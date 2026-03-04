@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAWAMAX - Barcode Label</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .product-info {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+
+        .product-info h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .label-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        /* Print-specific styles with exact dimensions */
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .printable-label {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Barcode container with exact dimensions: 5cm x 2cm */
+        .barcode-wrapper {
+            display: inline-block;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: white;
+            margin: 20px 0;
+        }
+
+        #barcode {
+            display: block;
+        }
+
+        /* Label with exact print dimensions */
+        .printable-label {
+            width: 5cm;
+            height: 2cm;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px dashed #999;
+            position: relative;
+        }
+
+        .printable-label svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.secondary {
+            background-color: #95a5a6;
+        }
+
+        button.secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        button.success {
+            background-color: #27ae60;
+        }
+
+        button.success:hover {
+            background-color: #229954;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .instructions {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+        }
+
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .barcode-number {
+            text-align: center;
+            font-family: monospace;
+            font-size: 14px;
+            color: #333;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .url-info {
+            background-color: #fff9e6;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .url-info p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .url-info code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 14px;
+            color: #e74c3c;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success message */
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hidden canvas for high-quality PNG export */
+        #hiddenCanvas {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="no-print">PAWAMAX Barcode Label Generator</h1>
+
+        <div class="product-info no-print">
+            <h2>Product Information</h2>
+            <div class="info-row">
+                <span class="info-label">Product Name:</span>
+                <span class="info-value">PAWAMAX</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Price:</span>
+                <span class="info-value">UGX 10,000</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Net Volume:</span>
+                <span class="info-value">4.5 LTRS</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Barcode Type:</span>
+                <span class="info-value">EAN-13</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Barcode Number:</span>
+                <span class="info-value" id="barcode-display">5901234123457</span>
+            </div>
+        </div>
+
+        <div class="label-container">
+            <h3 class="no-print">Printable Barcode Label (5cm × 2cm)</h3>
+            <div class="printable-label" id="printable-label">
+                <svg id="barcode"></svg>
+            </div>
+            <p class="barcode-number no-print" id="barcode-number"></p>
+        </div>
+
+        <div class="url-info no-print">
+            <p><strong>⚠️ Important Setup Instructions:</strong></p>
+            <p>For the barcode to redirect to the product page when scanned, you need to:</p>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>Host both <code>label.html</code> and <code>product.html</code> on a web server</li>
+                <li>Update the <code>productPageURL</code> variable in this file with your actual domain</li>
+                <li>Example: <code>const productPageURL = "https://yourdomain.com/product.html?code=";</code></li>
+            </ol>
+            <p style="margin-top: 10px;">Current URL (placeholder): <code id="current-url">http://localhost/product.html?code=</code></p>
+        </div>
+
+        <div class="buttons no-print">
+            <button onclick="window.print()">🖨️ Print Label</button>
+            <button class="success" onclick="downloadPNG()" id="downloadBtn">📥 Download PNG</button>
+            <button class="secondary" onclick="testBarcode()">🔍 Test Product Page</button>
+            <button class="secondary" onclick="generateNewBarcode()">🔄 Generate New Code</button>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            ✓ Barcode downloaded successfully as PNG!
+        </div>
+
+        <div class="instructions no-print">
+            <h3>Printing Instructions</h3>
+            <ol>
+                <li><strong>Click "Print Label"</strong> button above</li>
+                <li>In print settings, select <strong>"Print backgrounds"</strong> or <strong>"Background graphics"</strong></li>
+                <li>Set scale to <strong>100%</strong> (no scaling)</li>
+                <li>Use <strong>A4</strong> or <strong>Letter</strong> size paper</li>
+                <li>Ensure printer margins are set to minimum</li>
+                <li>The barcode will print at exactly 5cm × 2cm</li>
+                <li>Cut along the dashed border</li>
+                <li>Test the barcode with a scanner to verify it's scannable</li>
+            </ol>
+        </div>
+
+        <div class="instructions no-print" style="margin-top: 20px; background-color: #e8f8e8; border-left-color: #27ae60;">
+            <h3>PNG Download Instructions</h3>
+            <ol>
+                <li><strong>Click "Download PNG"</strong> to save the barcode as a high-quality image</li>
+                <li>The PNG will be exactly 5cm × 2cm at 300 DPI (590px × 236px)</li>
+                <li>Perfect for digital use, email, or professional printing</li>
+                <li>The image maintains the exact dimensions needed for scanning</li>
+                <li>Import into design software (Photoshop, Illustrator, etc.) at 300 DPI</li>
+            </ol>
+        </div>
+
+        <div class="instructions no-print" style="margin-top: 20px; background-color: #e8f8e8; border-left-color: #27ae60;">
+            <h3>How Barcode Scanning Works</h3>
+            <ol>
+                <li>The EAN-13 barcode contains a unique 13-digit number</li>
+                <li>When scanned, most modern barcode scanners can be configured to open a URL</li>
+                <li>The URL is constructed as: <code>https://yourdomain.com/product.html?code=[barcode-number]</code></li>
+                <li>The product.html page reads the barcode number and displays the product information</li>
+                <li><strong>Note:</strong> Standard barcode scanners typically just input the number. For automatic URL redirection, you'll need:
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>A smartphone with a QR/barcode scanner app that supports URL schemes, OR</li>
+                        <li>A programmable barcode scanner configured to append your domain URL, OR</li>
+                        <li>Use the test button above to manually open the product page</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Hidden canvas for PNG generation -->
+    <canvas id="hiddenCanvas"></canvas>
+
+    <script>
+        // Product configuration
+        const productData = {
+            name: "PAWAMAX",
+            price: "UGX 10,000",
+            volume: "4.5 LTRS"
+        };
+
+        // IMPORTANT: Update this URL with your actual domain where product.html is hosted
+        // Example: "https://yourdomain.com/product.html?code="
+        const productPageURL = "http://localhost/product.html?code=";
+        
+        // Generate a valid EAN-13 barcode number
+        function generateEAN13() {
+            // Generate 12 random digits (the 13th is a check digit)
+            let code = "590"; // Country code prefix (Poland/Uganda use various codes)
+            
+            // Add random manufacturer and product code (9 digits)
+            for (let i = 0; i < 9; i++) {
+                code += Math.floor(Math.random() * 10);
+            }
+            
+            // Calculate check digit
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+                sum += parseInt(code[i]) * (i % 2 === 0 ? 1 : 3);
+            }
+            const checkDigit = (10 - (sum % 10)) % 10;
+            code += checkDigit;
+            
+            return code;
+        }
+
+        // Use a fixed barcode for consistency (or generate a new one)
+        let barcodeNumber = "5901234123457"; // Valid EAN-13 with correct check digit
+
+        // Generate the barcode
+        function createBarcode(code) {
+            barcodeNumber = code;
+            
+            // Display the current URL
+            document.getElementById('current-url').textContent = productPageURL + barcodeNumber;
+            
+            // Generate barcode using JsBarcode
+            JsBarcode("#barcode", code, {
+                format: "EAN13",
+                width: 2,
+                height: 60,
+                displayValue: true,
+                fontSize: 14,
+                margin: 5,
+                background: "#ffffff",
+                lineColor: "#000000"
+            });
+
+            // Update barcode number display
+            document.getElementById('barcode-number').textContent = code;
+            document.getElementById('barcode-display').textContent = code;
+        }
+
+        // Generate a new barcode
+        function generateNewBarcode() {
+            const newCode = generateEAN13();
+            createBarcode(newCode);
+            alert('New barcode generated: ' + newCode);
+        }
+
+        // Test the product page
+        function testBarcode() {
+            const url = productPageURL + barcodeNumber;
+            window.open(url, '_blank');
+        }
+
+        // Download barcode as PNG with exact dimensions (5cm x 2cm at 300 DPI)
+        async function downloadPNG() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            const originalHTML = downloadBtn.innerHTML;
+            
+            // Disable button and show loading state
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '⏳ Generating PNG<span class="spinner"></span>';
+
+            try {
+                // 5cm = 1.968 inches, 2cm = 0.787 inches
+                // At 300 DPI: 5cm = 590px, 2cm = 236px
+                const dpi = 300;
+                const widthCm = 5;
+                const heightCm = 2;
+                const widthPx = Math.round((widthCm / 2.54) * dpi); // 590px
+                const heightPx = Math.round((heightCm / 2.54) * dpi); // 236px
+
+                // Get the barcode element
+                const barcodeElement = document.getElementById('printable-label');
+                
+                // Create a temporary canvas with exact dimensions
+                const canvas = document.getElementById('hiddenCanvas');
+                canvas.width = widthPx;
+                canvas.height = heightPx;
+                const ctx = canvas.getContext('2d');
+                
+                // Fill white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, widthPx, heightPx);
+
+                // Use html2canvas to capture the barcode
+                const tempCanvas = await html2canvas(barcodeElement, {
+                    backgroundColor: '#ffffff',
+                    scale: 3, // High quality capture
+                    logging: false,
+                    width: barcodeElement.offsetWidth,
+                    height: barcodeElement.offsetHeight
+                });
+
+                // Draw the captured barcode centered on our exact-size canvas
+                ctx.drawImage(tempCanvas, 0, 0, widthPx, heightPx);
+
+                // Convert canvas to blob
+                canvas.toBlob(function(blob) {
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = `PAWAMAX_Barcode_${barcodeNumber}.png`;
+                    link.href = url;
+                    link.click();
+                    
+                    // Clean up
+                    URL.revokeObjectURL(url);
+                    
+                    // Show success message
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.classList.add('show');
+                    setTimeout(() => {
+                        successMessage.classList.remove('show');
+                    }, 3000);
+
+                    // Re-enable button
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = originalHTML;
+                }, 'image/png', 1.0);
+
+            } catch (error) {
+                console.error('Error generating PNG:', error);
+                alert('Error generating PNG. Please try again.');
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = originalHTML;
+            }
+        }
+
+        // Initialize barcode on page load
+        window.onload = function() {
+            createBarcode(barcodeNumber);
+        };
+    </script>
+</body>
+</html>
