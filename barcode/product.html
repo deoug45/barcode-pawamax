@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Verification System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Helvetica Neue', sans-serif;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .system-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .system-title p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .scan-time {
+            text-align: right;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Status Banner */
+        .status-banner {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .status-banner.error {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .status-icon {
+            font-size: 32px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-text h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .status-text p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 25px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .product-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .product-name-section {
+            position: relative;
+            z-index: 1;
+        }
+
+        .product-category {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .product-name {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .product-subtitle {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        /* Product Details Grid */
+        .product-details {
+            padding: 0;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .detail-item {
+            padding: 25px 30px;
+            border-right: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background-color 0.2s;
+        }
+
+        .detail-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .detail-item:nth-child(2n) {
+            border-right: none;
+        }
+
+        .detail-item:nth-last-child(-n+2) {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-icon {
+            font-size: 14px;
+        }
+
+        .detail-value {
+            font-size: 28px;
+            color: #111827;
+            font-weight: 700;
+        }
+
+        /* Price Highlight */
+        .price-highlight {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            grid-column: 1 / -1;
+            padding: 30px;
+            text-align: center;
+            border: none !important;
+        }
+
+        .price-highlight:hover {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        }
+
+        .price-highlight .detail-label {
+            color: rgba(255,255,255,0.95);
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .price-highlight .detail-value {
+            color: white;
+            font-size: 42px;
+            margin-top: 5px;
+        }
+
+        /* Barcode Information */
+        .barcode-info {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            padding: 25px 30px;
+            margin-bottom: 25px;
+        }
+
+        .barcode-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .barcode-header h3 {
+            font-size: 18px;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .barcode-icon {
+            font-size: 24px;
+        }
+
+        .barcode-display {
+            background-color: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .barcode-number {
+            font-family: 'Courier New', monospace;
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e3c72;
+            letter-spacing: 3px;
+        }
+
+        .barcode-type {
+            background-color: #1e3c72;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* Additional Info */
+        .additional-info {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            padding: 25px 30px;
+            margin-bottom: 25px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-row-label {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .info-row-value {
+            color: #111827;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Verification Badge */
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .verification-badge::before {
+            content: "✓";
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Error Message */
+        .error-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            padding: 40px;
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .error-container h2 {
+            color: #ef4444;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .error-container p {
+            color: #6b7280;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .barcode-not-found {
+            background-color: #fef2f2;
+            border: 2px dashed #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .barcode-not-found code {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            padding: 20px 30px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .footer-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+            margin: 15px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .scan-time {
+                text-align: center;
+            }
+
+            .system-title h1 {
+                font-size: 20px;
+            }
+
+            .product-name {
+                font-size: 36px;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-item {
+                border-right: none;
+            }
+
+            .price-highlight {
+                grid-column: 1;
+            }
+
+            .barcode-display {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .barcode-number {
+                font-size: 24px;
+            }
+
+            .detail-value {
+                font-size: 24px;
+            }
+
+            .price-highlight .detail-value {
+                font-size: 36px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #1e3c72;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">🏪</div>
+                <div class="system-title">
+                    <h1>Product Verification System</h1>
+                    <p>Retail Point of Sale - Product Lookup</p>
+                </div>
+            </div>
+            <div class="scan-time">
+                <div><strong>Scan Time:</strong></div>
+                <div id="scan-time">-</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Status Banner -->
+        <div class="status-banner" id="status-banner" style="display: none;">
+            <div class="status-icon">✓</div>
+            <div class="status-text">
+                <h2>Product Verified Successfully</h2>
+                <p>Product found in database - Displaying product information</p>
+            </div>
+        </div>
+
+        <!-- Product Content (Will be populated by JavaScript) -->
+        <div id="product-content"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-item">
+                    <span>🔒</span>
+                    <span>Secure Verification</span>
+                </div>
+                <div class="footer-item">
+                    <span>⚡</span>
+                    <span>Real-time Lookup</span>
+                </div>
+                <div class="footer-item">
+                    <span>✓</span>
+                    <span>Authentic Product</span>
+                </div>
+            </div>
+            <div class="footer-divider"></div>
+            <p>© 2026 Product Verification System. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // Product database - in production, this would come from a server/database
+        const productDatabase = {
+            "5901234123457": {
+                name: "PAWAMAX",
+                category: "Beverages",
+                price: "UGX 10,000",
+                volume: "4.5 LTRS",
+                manufacturer: "PowerDrink Ltd.",
+                origin: "Uganda",
+                expiryDate: "12/2026",
+                batchNumber: "PWM2026A"
+            }
+            // Add more products here as needed
+        };
+
+        // Get barcode from URL parameter
+        function getBarcodeFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
+
+        // Display product information
+        function displayProduct() {
+            const barcodeNumber = getBarcodeFromURL();
+            
+            // Display current time
+            const now = new Date();
+            document.getElementById('scan-time').textContent = now.toLocaleString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const productContent = document.getElementById('product-content');
+
+            if (!barcodeNumber) {
+                showError("No barcode scanned", "Please scan a valid product barcode to view information.");
+                return;
+            }
+
+            // Look up product in database
+            const product = productDatabase[barcodeNumber];
+
+            if (product) {
+                // Show success banner
+                const statusBanner = document.getElementById('status-banner');
+                statusBanner.style.display = 'flex';
+
+                // Display product information
+                productContent.innerHTML = `
+                    <!-- Product Card -->
+                    <div class="product-card">
+                        <div class="product-header">
+                            <div class="product-name-section">
+                                <div class="product-category">${product.category}</div>
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-subtitle">Premium Quality Product</div>
+                            </div>
+                        </div>
+
+                        <div class="product-details">
+                            <div class="details-grid">
+                                <div class="detail-item price-highlight">
+                                    <div>
+                                        <div class="detail-label">
+                                            <span class="detail-icon">💰</span>
+                                            Retail Price
+                                        </div>
+                                        <div class="detail-value">${product.price}</div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <div>
+                                        <div class="detail-label">
+                                            <span class="detail-icon">📦</span>
+                                            Net Volume
+                                        </div>
+                                        <div class="detail-value">${product.volume}</div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <div>
+                                        <div class="detail-label">
+                                            <span class="detail-icon">🏭</span>
+                                            Manufacturer
+                                        </div>
+                                        <div class="detail-value" style="font-size: 20px;">${product.manufacturer}</div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <div>
+                                        <div class="detail-label">
+                                            <span class="detail-icon">🌍</span>
+                                            Country of Origin
+                                        </div>
+                                        <div class="detail-value" style="font-size: 22px;">${product.origin}</div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <div>
+                                        <div class="detail-label">
+                                            <span class="detail-icon">📅</span>
+                                            Best Before
+                                        </div>
+                                        <div class="detail-value" style="font-size: 22px;">${product.expiryDate}</div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <div>
+                                        <div class="detail-label">
+                                            <span class="detail-icon">#️⃣</span>
+                                            Batch Number
+                                        </div>
+                                        <div class="detail-value" style="font-size: 22px;">${product.batchNumber}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barcode Information -->
+                    <div class="barcode-info">
+                        <div class="barcode-header">
+                            <span class="barcode-icon">📊</span>
+                            <h3>Barcode Information</h3>
+                        </div>
+                        <div class="barcode-display">
+                            <div class="barcode-number">${barcodeNumber}</div>
+                            <div class="barcode-type">EAN-13</div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="additional-info">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div class="verification-badge">Product Authenticated</div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row-label">Product Status</span>
+                            <span class="info-row-value" style="color: #10b981;">✓ In Stock</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row-label">Verification Method</span>
+                            <span class="info-row-value">EAN-13 Barcode Scan</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row-label">Database Status</span>
+                            <span class="info-row-value" style="color: #10b981;">✓ Verified</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row-label">Last Updated</span>
+                            <span class="info-row-value">${now.toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Product not found
+                showError(
+                    "Product Not Found", 
+                    "The scanned barcode is not registered in our database.",
+                    barcodeNumber
+                );
+            }
+        }
+
+        // Show error message
+        function showError(title, message, barcode = null) {
+            const statusBanner = document.getElementById('status-banner');
+            statusBanner.className = 'status-banner error';
+            statusBanner.innerHTML = `
+                <div class="status-icon">⚠️</div>
+                <div class="status-text">
+                    <h2>${title}</h2>
+                    <p>${message}</p>
+                </div>
+            `;
+            statusBanner.style.display = 'flex';
+
+            const productContent = document.getElementById('product-content');
+            productContent.innerHTML = `
+                <div class="error-container">
+                    <div class="error-icon">❌</div>
+                    <h2>${title}</h2>
+                    <p>${message}</p>
+                    ${barcode ? `
+                        <div class="barcode-not-found">
+                            <strong>Scanned Barcode:</strong><br>
+                            <code>${barcode}</code>
+                        </div>
+                    ` : ''}
+                    <div style="margin-top: 30px;">
+                        <p style="font-size: 14px;">Possible reasons:</p>
+                        <ul style="text-align: left; display: inline-block; margin-top: 15px; color: #6b7280;">
+                            <li>Product not registered in database</li>
+                            <li>Invalid barcode format</li>
+                            <li>Product discontinued</li>
+                            <li>Database synchronization pending</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            displayProduct();
+        };
+    </script>
+</body>
+</html>
